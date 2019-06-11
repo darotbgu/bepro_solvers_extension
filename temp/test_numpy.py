@@ -2,6 +2,7 @@ import numpy as np
 from scipy.optimize import *
 from math import cos, atan
 
+
 def func(x):
     return x
 
