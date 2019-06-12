@@ -1,4 +1,4 @@
-import ThreadsRunner
+from ThreadsRunner import ThreadsRunner
 from composers.Z3Composer import Z3Composer
 from utils.solverUtils import *
 
@@ -37,7 +37,7 @@ def exclusion():
 def main():
     bthreads = [three_cold(), three_hot(), exclusion(), no_two_hot_in_a_row(), no_two_cold_in_a_row()]
     composer = Z3Composer()
-    runner = ThreadsRunner.ThreadsRunner(bthreads, composer)
+    runner = ThreadsRunner(bthreads, composer)
     runner.run()
 
 
