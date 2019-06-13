@@ -12,21 +12,44 @@ class MinimizeComposer(BaseComposer):
     def wrap(accum, f):
         return lambda x: f(accum(x))
 
+    @staticmethod
+    def get_smaller_bound(bounds):
+        min_bound = []
+        for bound in bounds:
+            if not min_bound:
+                min_bound = bound
+                continue
+
+            for i in range(len(bound)):
+                lower = bound[i][0]
+                upper = bound[i][1]
+                if lower > min_bound[i][0]:
+                    min_bound[i][0] = lower
+                if upper < min_bound[i][1]:
+                    min_bound[i][1] = upper
+        return min_bound
+
     def compose(self, snapshots):
         cons = []
-        bound = ()
-
+        bounds = []
         new_x = []
-        origin_x = 0
 
         for ss in snapshots:
-            origin_x = ss.get("request").get("x")
-            new_x.append(ss.get("request").get("fun")(origin_x))
-            cons.extend(ss.get("block").get("constraints"))
-            bound = ss.get("block").get("bound")
-        new_x.extend([0] * (len(origin_x) - len(new_x)))
+            request = ss.get("request")
+            block = ss.get("block")
 
-        return {"x": new_x, "fun": self._func}, {"bound": bound, "constraints": cons}
+            if request:
+                origin_x = request.get("x", None)
+                if origin_x is None:
+                    raise KeyError("Expected x vector")
+                new_x.append(request.get("fun")(origin_x))
+
+            if block:
+                cons.extend(block.get("constraints"))
+                bounds.append(block.get("bound"))
+
+        return {"x": new_x, "fun": self._func}, \
+               {"bound": MinimizeComposer.get_smaller_bound(bounds), "constraints": cons}
 
     def next_event(self, requested, blocked):
         return minimize_equation(requested.get("fun"), requested.get("x")
@@ -35,12 +58,18 @@ class MinimizeComposer(BaseComposer):
                                  , constraints=blocked.get("constraints"))
 
     def advance_bthreads(self, event, snapshots):
-        # print("Event:\n", event)
         success = True
+        bound = ()
+        constraints = []
         for ss in snapshots:
-            fun = ss.get("request").get("fun")
-            constraints = ss.get("block").get("constraints")
-            bound = ss.get("block").get("bound")
+            request = ss.get("request")
+            block = ss.get("block")
+            if request:
+                fun = request.get("fun", None)
+
+            if block:
+                constraints = block.get("constraints")
+                bound = block.get("bound")
             min_res = minimize_equation(fun, x=event.x, bounds=bound, constraints=constraints)
             if min_res.success:
                 success = success and min_res.success

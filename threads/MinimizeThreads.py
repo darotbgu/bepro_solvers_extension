@@ -18,32 +18,37 @@ def obj_func(x):
 
 
 def first_thread(x):
-    cons = {'type': 'ineq', 'fun': lambda z: (z[0] * z[1] - (z[0] - 2 * z[3]) * (z[1] - 2 * z[2]) - 7.55)}
+    cons = {'type': 'eq', 'fun': lambda z: (z[0] * z[1] - (z[0] - 2 * z[3]) * (z[1] - 2 * z[2]) - 7.55)}
 
-    bnds = ((0.3, 10), (0.3, 10), (0.3, 10), (0.3, 10))
-    # while True:
+    bound = [[0.3, 10], [0.3, 10], [0.3, 10], [0.3, 10]]
+
     yield {"request": {"x": x, "fun": div_by_3},
-                   "block": {"bound": bnds, "constraints": [cons]}}
+           "block": {"bound": bound, "constraints": [cons]}}
 
 
 def second_thread(x):
     cons = {'type': 'ineq', 'fun': lambda z: 0.1}
-    bnds = ((0.1, 100), (0.2, 100), (0.1, 100), (0.1, 100))  # all four variables are positive and greater than zero
+    bound = [[0.1, 100], [0.2, 100], [0.1, 100], [0.1, 100]]
 
     yield {"request": {"x": x, "fun": div_by_2},
-           "block": {"bound": bnds, "constraints": [cons]}}
+           "block": {"bound": bound, "constraints": [cons]}}
 
-    # m = yield {"request": {"x": x, "fun": power_by_3},
-    #            "block": [NonlinearConstraint(f_x, lb=-np.inf, ub=5, jac='2-point', hess=BFGS())]}
-               # "block": [{"type": "eq",
-               #           "fun": NonlinearConstraint(f_x, lb=-np.inf, ub=5, jac='2-point')}]}
+
+def third_thread(x):
+    bound = [[3, 10], [3, 10], [3, 10], [3, 10]]
+
+    yield {"request": {"x": x, "fun": lambda x: sum(i+2 for i in x)}, "block": {"bound": bound, "constraints": []}}
+
+
+def fourth_thread(x):
+    bound = [[4, 36], [4, 36], [4, 36], [4, 36]]
+    yield {"request": {"x": x, "fun": lambda x: sum(i**2 for i in x)}, "block": {"bound": bound, "constraints": []}}
 
 
 def main():
-    first = np.array([2, 2, 0.2, 0.2])
-    second = np.array([4, 4, 0.4, 0.4])
+    x = np.array([2, 2, 0.2, 0.2])
 
-    bthreads = [first_thread(first), second_thread(second)]
+    bthreads = [first_thread(x), second_thread(x), third_thread(x), fourth_thread(x)]
     composer = MinimizeComposer(np.linalg.norm)
     runner = ThreadsRunner(bthreads, composer)
     runner.run()

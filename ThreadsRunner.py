@@ -30,8 +30,3 @@ class ThreadsRunner(object):
             print("Event--->", event)
 
             self._advance_bthreads(event)
-
-
-# TODO: prints or logs when debuging of debug
-# TODO: numpyComposer
-# TODO: composer functions
