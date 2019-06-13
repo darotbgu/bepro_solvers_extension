@@ -2,6 +2,19 @@ import numpy as np
 from composers.MinimizeComposer import MinimizeComposer
 from ThreadsRunner import ThreadsRunner
 
+robot_x = 0.1
+robot_y = 0.9
+
+bound = ((0, 1), (0, 1), (0, 1), (0, 1))
+x_start = [0, 0.2, 0.2, 0.4]
+y_start = [0.8, 1, 0.6, 0.8]
+
+
+center_x = 0.2
+center_y = 0.8
+
+def block():
+    pass
 
 def div_by_2(x):
     return sum(i/2 for i in x)
@@ -20,18 +33,18 @@ def obj_func(x):
 def first_thread(x):
     cons = {'type': 'ineq', 'fun': lambda z: (z[0] * z[1] - (z[0] - 2 * z[3]) * (z[1] - 2 * z[2]) - 7.55)}
 
-    bnds = ((0.3, 10), (0.3, 10), (0.3, 10), (0.3, 10))
+    # bnds = ((0, 1), (0.3, 10), (0.3, 10), (0.3, 10))
     # while True:
     yield {"request": {"x": x, "fun": div_by_3},
-                   "block": {"bound": bnds, "constraints": [cons]}}
+                   "block": {"bound": bound, "constraints": [cons]}}
 
 
 def second_thread(x):
     cons = {'type': 'ineq', 'fun': lambda z: 0.1}
-    bnds = ((0.1, 100), (0.2, 100), (0.1, 100), (0.1, 100))  # all four variables are positive and greater than zero
+    # bnds = ((0.1, 100), (0.2, 100), (0.1, 100), (0.1, 100))  # all four variables are positive and greater than zero
 
     yield {"request": {"x": x, "fun": div_by_2},
-           "block": {"bound": bnds, "constraints": [cons]}}
+           "block": {"bound": bound, "constraints": [cons]}}
 
     # m = yield {"request": {"x": x, "fun": power_by_3},
     #            "block": [NonlinearConstraint(f_x, lb=-np.inf, ub=5, jac='2-point', hess=BFGS())]}

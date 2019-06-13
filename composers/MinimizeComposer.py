@@ -20,7 +20,9 @@ class MinimizeComposer(BaseComposer):
         origin_x = 0
 
         for ss in snapshots:
-            origin_x = ss.get("request").get("x")
+            request = ss.get("request")
+            if request:
+                origin_x = request.get("x")
             new_x.append(ss.get("request").get("fun")(origin_x))
             cons.extend(ss.get("block").get("constraints"))
             bound = ss.get("block").get("bound")

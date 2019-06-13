@@ -10,7 +10,7 @@ TRUST_CONSTR = "trust-constr"
 def minimize_equation(func, x, bounds, constraints):
     # expecting to get numpy array
 
-    return minimize(func, x, bounds=bounds, constraints=constraints)
+    return minimize(func, x, bounds=bounds, constraints=constraints, tol=0.1)
 
 
 def f_x(x):
