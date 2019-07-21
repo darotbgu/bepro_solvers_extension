@@ -30,3 +30,4 @@ The ThreadRunner holds the current "snapshot" of the threads,
 # ####
 
 This mechanism allow you to use BP with any chosen solver, by creating new Composers.
+You can see some examples in threads folder.
